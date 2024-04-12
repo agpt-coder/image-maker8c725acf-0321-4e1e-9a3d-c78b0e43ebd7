@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "image-maker"
+version = "0.1.0"
+description = "Based on the information gathered from our discussion and searches, the goal is to create images from input text leveraging some of the most advanced tools available. The user has a preference for images generated in a specific style or theme and intends to use these images across various applications, possibly including branding, personal projects, advertisements, or entertainment. From the research conducted, the best tools for generating images from text include DALL·E 2 by OpenAI, Artbreeder, DeepArt, and Runway ML. These tools utilize cutting-edge AI algorithms to transform textual descriptions into visual images that meet a wide array of needs, aligning well with the user's requirements. To embark on this project, the recommended approach would involve selecting one or more of these mentioned platforms based on the specific style, theme, and application requirements of the user, ensuring the generated images align perfectly with the user's vision and purpose."
+authors = ["AutoGPT <info@agpt.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+bcrypt = "^3.2.0"
+fastapi = "*"
+passlib = "^1.7.4"
+prisma = "*"
+pydantic = "*"
+uvicorn = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

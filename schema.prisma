@@ -1,0 +1,136 @@
+// datasource db defines the database connection settings.
+// It is configured for PostgreSQL and uses an environment variable for the connection URL.
+// The 'extensions' feature enables the use of PostgreSQL-specific data types.
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+}
+
+// generator db configures Prisma Client settings.
+// It is set up to use Prisma Client Python with asyncio interface and specific features.
+generator db {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+  previewFeatures      = ["postgresqlExtensions"]
+}
+
+model User {
+  id                  String               @id @default(dbgenerated("gen_random_uuid()"))
+  email               String               @unique
+  hashedPassword      String
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  Role                Role                 @relation(fields: [roleId], references: [id])
+  roleId              String
+  Profile             Profile?
+  UserPreferences     UserPreferences[]
+  TextInputs          TextInput[]
+  GeneratedImages     GeneratedImage[]
+  FeedbackSubmissions FeedbackSubmission[]
+  ApiKeys             ApiKey[]
+  Subscription        Subscription[]
+  ImageRequestLog     ImageRequestLog[]
+}
+
+model Role {
+  id          String  @id @default(dbgenerated("gen_random_uuid()"))
+  name        String  @unique
+  description String?
+  Users       User[]
+}
+
+model Profile {
+  id        String  @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String  @unique
+  firstName String?
+  lastName  String?
+  User      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserPreferences {
+  id       String  @id @default(dbgenerated("gen_random_uuid()"))
+  userId   String
+  User     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme    String?
+  language String  @default("en")
+}
+
+model TextInput {
+  id              String            @id @default(dbgenerated("gen_random_uuid()"))
+  userId          String
+  User            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime          @default(now())
+  inputText       String
+  styleId         String?
+  Style           Style?            @relation(fields: [styleId], references: [id], onDelete: SetNull)
+  GeneratedImage  GeneratedImage[]
+  ImageRequestLog ImageRequestLog[]
+}
+
+model Style {
+  id          String      @id @default(dbgenerated("gen_random_uuid()"))
+  name        String
+  description String?
+  TextInputs  TextInput[]
+}
+
+model GeneratedImage {
+  id             String           @id @default(dbgenerated("gen_random_uuid()"))
+  imageUrl       String
+  createdAt      DateTime         @default(now())
+  userId         String
+  User           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  textInputId    String
+  TextInput      TextInput        @relation(fields: [textInputId], references: [id], onDelete: Cascade)
+  ModeratedImage ModeratedImage[]
+}
+
+model FeedbackSubmission {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  content   String
+}
+
+model ApiKey {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key       String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Subscription {
+  id        String           @id @default(dbgenerated("gen_random_uuid()"))
+  type      SubscriptionType
+  startDate DateTime
+  endDate   DateTime?
+  userId    String
+  User      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ImageRequestLog {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  userId      String
+  User        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  textInputId String
+  TextInput   TextInput @relation(fields: [textInputId], references: [id], onDelete: Cascade)
+  requestTime DateTime  @default(now())
+  success     Boolean
+}
+
+model ModeratedImage {
+  id               String         @id @default(dbgenerated("gen_random_uuid()"))
+  generatedImageId String
+  GeneratedImage   GeneratedImage @relation(fields: [generatedImageId], references: [id], onDelete: Cascade)
+  moderatedAt      DateTime       @default(now())
+  isApproved       Boolean
+}
+
+enum SubscriptionType {
+  FREE
+  PREMIUM
+}
+
